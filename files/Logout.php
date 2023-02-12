@@ -1,0 +1,7 @@
+<?php
+
+dbHelper->logOut();
+
+redirect("/");
+
+?>

@@ -1,0 +1,53 @@
+<?php
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const MODULE_NAME_AI_IMAGES = 'ai-images';
+
+const ACCOUNT_TYPE_DEFAULT = 0;
+const ACCOUNT_TYPE_PREMIUM = 1;
+const ACCOUNT_TYPE_ANON = 2;
+
+const aiImageGeneratedMaxCount = 0;
+const aiImageGeneratedMaxCountWithPremium = 3;
+const aiImageGeneratedPremiumPrice = 100;
+const aiImageGeneratedMaxCountAnon = 2;
+
+
+const anonTariffDurationSecs = 60; //* 60 * 24;
+
+const defaulModulesLimitByType = [
+    MODULE_NAME_AI_IMAGES => [
+        ACCOUNT_TYPE_DEFAULT => aiImageGeneratedMaxCount,
+        ACCOUNT_TYPE_PREMIUM => aiImageGeneratedMaxCountWithPremium,
+        ACCOUNT_TYPE_ANON => aiImageGeneratedMaxCountAnon,
+    ]
+];
+
+const PAYMENT_FOR_MODULE_PREMIUM_PREFIX = 'payment-for-module-premium';
+
+const PAYMENT_LINK_STRIPE = 'stripe';
+
+const BUY_PREMIUM_BUTTON_TEXT = 'Get Content King Premium';
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//without end slash
+const webUrl = "http://localhost";
+
+//YOUR OPENAI API TOKEN
+const token = "";
+
+const imgApiKey = "";
+
+const password = "";
+
+const serviceAccoutPath = '';
+
+const hCaptchaSiteKey = '10000000-ffff-ffff-ffff-000000000001';
+const hCaptchaSecret = '0x0000000000000000000000000000000000000000';
+
+const stripeKey = '';
+
+const stripeWebHookSec = '';

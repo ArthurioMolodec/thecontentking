@@ -1,0 +1,10 @@
+{
+    "require": {
+        "google/cloud": "*",
+        "kreait/firebase-php": "^7.0",
+        "google/apiclient": "^2.13",
+        "google/cloud-core": "^1.48",
+        "google/cloud-firestore": "*",
+        "stripe/stripe-php": "^10.4"
+    }
+}
