@@ -7,7 +7,11 @@ class DBHelper {
     private \Kreait\Firebase\Contract\Auth $auth;
     private \Google\Cloud\Firestore\FirestoreClient $database;
 
-    function __construct($serviceAccPath = serviceAccoutPath)
+    private $user_id = null;
+    private $userkey = null;
+    private $id_token = null;
+
+    function __construct($params = [], $serviceAccPath = serviceAccoutPath)
     {
         $factory = (new Factory())->withServiceAccount($serviceAccPath);
         
@@ -15,6 +19,18 @@ class DBHelper {
 
         $this->database = $firestore->database();
         $this->auth = $factory->createAuth();
+
+        $this->setParams($params);
+    }
+
+    public function setParams($params = []) {
+        if (isset($params['userkey'])) {
+            $this->userkey = $params['userkey'];
+        }
+
+        if (isset($params['id_token'])) {
+            $this->id_token = $params['id_token'];
+        }
     }
 
     function getUserCollection() {
@@ -32,6 +48,9 @@ class DBHelper {
     function checkLogin($idToken) {    
         try {
             $tokenVerify = $this->auth->verifyIdToken($idToken, true);
+
+            $this->user_id = $tokenVerify->claims()->get('user_id');
+            $this->id_token = $tokenVerify;
             return true;
         } catch (Exception $ex) {
             return false;
@@ -50,12 +69,25 @@ class DBHelper {
         $collection->document($key)->set($additional_data);
         $this->userApiCallsForAll($key);
 
-        $_SESSION['userkey'] = $key;
+        $this->userkey = $key;
+        $_SESSION['userkey'] = $this->userkey;
+    }
+
+    public function getAuthData() {
+        return [
+            'id_token' => isset($this->id_token) ? $this->id_token->toString() : $this->id_token,
+            'userkey' => $this->userkey,
+        ];
     }
 
     function findAnon($ip, $userkey = null) {
         if (!$userkey) {
-            $userkey = $_SESSION['userkey'];
+            if (isset($this->userkey)) {
+                $userkey = $this->userkey;
+            }
+            if (!$userkey) {
+                $userkey = $_SESSION['userkey'];
+            }
         }
         $collection = $this->getUserCollection();
 
@@ -83,7 +115,21 @@ class DBHelper {
     }
 
     function getUserId() {
-        $user_id = $_SESSION['user_id'];
+        $user_id = null;
+
+        if (isset($this->user_id)) {
+            $user_id = $this->user_id;
+        }
+
+        if (!$user_id) {
+            $user_id = $_SESSION['user_id'];
+        }
+
+        if (!$user_id) {
+            if (isset($this->userkey)) {
+                $user_id = $this->userkey;
+            }
+        }
 
         if (!$user_id) {
             $userkey = $_SESSION['userkey'];
@@ -115,8 +161,11 @@ class DBHelper {
     function loginWithEmailPass($email, $password) {    
         try {
             $tokenVerify = $this->auth->signInWithEmailAndPassword($email, $password);
-            $_SESSION['user_id'] = $tokenVerify->firebaseUserId();
-            $_SESSION['id_token'] = $this->auth->verifyIdToken($tokenVerify->idToken());
+            $this->user_id = $tokenVerify->firebaseUserId();
+            $this->id_token = $this->auth->verifyIdToken($tokenVerify->idToken());
+
+            $_SESSION['user_id'] = $this->user_id;
+            $_SESSION['id_token'] = $this->id_token;
             return true;
         } catch (Exception $ex) {
             return $ex->getMessage();
@@ -138,9 +187,13 @@ class DBHelper {
         }
     }
     
-    function logOut() {    
-        if ($_SESSION['user_id']) {
-            $this->auth->revokeRefreshTokens($_SESSION['user_id']);
+    function logOut() {
+        if (!isset($this->user_id)) {
+            $this->user_id = $_SESSION['user_id'];
+        }
+
+        if ($this->user_id) {
+            $this->auth->revokeRefreshTokens($this->user_id);
         }
     
         $_SESSION['id_token'] = null;

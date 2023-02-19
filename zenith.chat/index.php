@@ -82,6 +82,8 @@ $route->post("/biographyapi", "../files/API/BiographyApi.php", 'auth-api');
 
 $route->post("/webhook-stripe", "../files/API/StripeHook.php");
 
+$route->post("/authapi", "../files/API/AuthApi.php");
+
 $route->getpost("/apichat", "../files/API/ChatApi.php");
 
 $route->notFound("404.php");
