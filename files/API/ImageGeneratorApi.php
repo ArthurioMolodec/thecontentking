@@ -9,7 +9,7 @@ $user_type = isset($user['type']) ? $user['type'] : ACCOUNT_TYPE_DEFAULT;
 $leftCount = dbHelper->getUserApiCalls(MODULE_NAME_AI_IMAGES, defaulModulesLimitByType[MODULE_NAME_AI_IMAGES][$user_type]);
 
 if ($leftCount <= 0) {
-    if (!$_SESSION['id_token']) {
+    if (!dbHelper->getAuthData()['id_token']) {
         echo json_encode(['status' => false, 'error' => 'needauth', 'redirect' => null, 'total_count' => 0, 'left_count' => 0]);
         return;
     }
@@ -20,14 +20,18 @@ if ($leftCount <= 0) {
 
 dbHelper->incrementApiCalls(MODULE_NAME_AI_IMAGES);
 
-$result = json_decode(file_get_contents('http://178.18.248.235:5005/image-generator?prompt=' . urlencode($prompt)), true);
+$result = json_decode(file_get_contents('http://178.18.248.235:5005/image-generator?prompt=' . urlencode($prompt), false, stream_context_create(array('http'=>
+    array(
+        'timeout' => 8 * 60,
+    )
+))), true);
 
 $result['total_count'] = defaulModulesLimitByType[MODULE_NAME_AI_IMAGES][$user_type];
 $result['left_count'] = $leftCount - 1;
 // $result['status'] = true;
 
 if ($leftCount - 1 <= 0) {
-    if (!$_SESSION['id_token']) {
+    if (!dbHelper->getAuthData()['id_token']) {
         $result['error'] = 'needauth';
     } else {
         $result['error'] = 'unpayed';
